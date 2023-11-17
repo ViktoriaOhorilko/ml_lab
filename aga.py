@@ -1,8 +1,11 @@
+from copy import deepcopy
+
 import numpy as np
+from configs import NUM_TASKS, MAX_DURATION
 
 # PSO parameters
-PARTICLE_COUNT = 30
-MAX_ITERATIONS = 100
+PARTICLE_COUNT = 100
+MAX_ITERATIONS = 200
 W = 0.5  # inertia weight
 C1 = 1.5  # personal best weight
 C2 = 1.5  # global best weight
@@ -10,10 +13,15 @@ C2 = 1.5  # global best weight
 
 def pso_fitness(position, tasks, virtual_machines):
     total_cost = 0
+    for vm in virtual_machines:
+        vm['used'] = 0
+
     for idx, vm_id in enumerate(position):
         task = tasks[idx]
         vm = virtual_machines[vm_id]
-        if vm['speed'] * task['deadline'] >= task['cost']:
+        if vm['used'] + vm['speed'] * task['deadline'] <= MAX_DURATION and vm['speed'] * task['deadline'] >= task[
+            'cost']:
+            vm['used'] += vm['speed'] * task['deadline']
             total_cost += task['cost'] * vm['cost']
         else:
             total_cost += float('inf')  # penalty for not meeting the deadline
@@ -37,7 +45,10 @@ class Particle:
         self.position = np.mod(self.position + self.velocity.astype(int), vms_count)
 
 
-def particle_swarm_optimization(tasks, virtual_machines):
+def particle_swarm_optimization(tasks_, virtual_machines_):
+    tasks = sorted(deepcopy(tasks_), key=lambda x: (x['deadline'], -x['cost']), reverse=True)
+    virtual_machines = sorted(deepcopy(virtual_machines_), key=lambda x: (x['speed'], -x['cost']), reverse=True)
+
     particles = [Particle(len(tasks), len(virtual_machines)) for _ in range(PARTICLE_COUNT)]
     global_best_position = np.random.randint(0, len(virtual_machines), size=len(tasks))
     global_best_score = float('inf')
@@ -57,5 +68,6 @@ def particle_swarm_optimization(tasks, virtual_machines):
             particle.update_velocity(global_best_position)
             particle.update_position(len(virtual_machines))
 
-    return global_best_position
+    return [{'task_id': tasks[idx]['task_id'], 'vm_id': virtual_machines[vm_id]['vm_id']} for idx, vm_id in
+            enumerate(global_best_position)]
 

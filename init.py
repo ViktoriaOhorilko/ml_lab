@@ -8,6 +8,7 @@ from gs import greedy_search
 from ga import genetic_algorithm
 from aga import particle_swarm_optimization
 from new_a import optimised_genetic_algorithm
+from my_method import simulated_annealing
 
 random.seed(0)
 def generate_data(num_tasks=10, num_vms=5):
@@ -32,7 +33,8 @@ def evaluation(tasks, virtual_machines, run_algorithm):
     completed_tasks = 0
     max_completion_time = 0
 
-
+    for vm in virtual_machines:
+        vm['used'] = 0
     for idx, sol in enumerate(scheduled_tasks):
         task = tasks[sol["task_id"]]
         vm = virtual_machines[sol["vm_id"]]
@@ -77,4 +79,8 @@ if __name__ == '__main__':
 
     # Evaluate the  new genetic algorithm
     evaluation_metrics = evaluation(tasks, virtual_machines, optimised_genetic_algorithm)
+    print(evaluation_metrics)
+
+    # Evaluate the  simulated annealing algorithm
+    evaluation_metrics = evaluation(tasks, virtual_machines, simulated_annealing)
     print(evaluation_metrics)

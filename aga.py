@@ -5,7 +5,7 @@ from configs import NUM_TASKS, MAX_DURATION
 
 # PSO parameters
 PARTICLE_COUNT = 100
-MAX_ITERATIONS = 200
+MAX_ITERATIONS = 250
 W = 0.5  # inertia weight
 C1 = 1.5  # personal best weight
 C2 = 1.5  # global best weight
